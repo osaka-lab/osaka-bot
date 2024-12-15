@@ -51,8 +51,6 @@ impl Images {
         let images: Vec<_> = glob(&glob_path)
             .expect(format!("Failed to glob file path '{}'", &glob_path).as_str())
             .into_iter().flatten().collect();
-
-        println!("{:#?}", images);
         
         let path = images.choose(&mut thread_rng());
 

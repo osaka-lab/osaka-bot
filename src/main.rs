@@ -38,7 +38,7 @@ async fn get_agent() -> BskyAgent {
     match login {
         Ok(_) => (),
         Err(err) => {
-            panic!("Error while login. {}", err)
+            panic!("Error while login: {}", err)
         }
     }
 
