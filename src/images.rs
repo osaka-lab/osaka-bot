@@ -1,6 +1,6 @@
 use bsky_sdk::{api::{types::Union, app::bsky::embed::images, app::bsky::feed::post}, BskyAgent};
 use glob::glob;
-use std::{fs, path::{Path, PathBuf}};
+use std::{fs, path::PathBuf};
 use tokio::{fs::File, io::AsyncReadExt};
 use rand::{seq::SliceRandom, thread_rng};
 use serde::Deserialize;
@@ -72,7 +72,7 @@ impl Images {
 
         println!("{}", toml_path);
 
-        if Path::new(&toml_path).exists() {
+        if PathBuf::from(&toml_path).exists() {
             let value = fs::read_to_string(&toml_path).unwrap(); // Shouldn't error because erm i check if it exists.
             let parsed_credit = toml::from_str::<CreditToml>(&value);
 
