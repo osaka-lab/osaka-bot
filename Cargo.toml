@@ -1,0 +1,12 @@
+[package]
+name = "osaka-bot"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bsky-sdk = "0.1.14"
+glob = "0.3.1"
+rand = "0.8.5"
+tokio = {version = "1.42.0", features = ["rt", "macros", "fs", "signal"]}
+cron_tab = {version = "0.2.7", features = ["async"]}
+chrono-tz = "0.10.0"

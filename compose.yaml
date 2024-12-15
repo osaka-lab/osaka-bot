@@ -1,0 +1,9 @@
+services:
+  osaka-bot:
+    image: r3tr0ananas/osaka-bot:latest
+    environment:
+      - BSKY_EMAIL=example@example.com
+      - BSKY_PASS=example
+    volumes:
+      - ./images:/app/images
+      - ./uploaded:/app/uploaded
