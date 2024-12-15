@@ -10,9 +10,9 @@ use crate::images::Images;
 mod images;
 
 async fn get_agent() -> BskyAgent {
-    if Path::new("./config.json").exists() {
+    if Path::new("./login.json").exists() {
         let agent = BskyAgent::builder()
-            .config(Config::load(&FileStore::new("config.json")).await.unwrap())
+            .config(Config::load(&FileStore::new("login.json")).await.unwrap())
             .build()
             .await;
 
@@ -45,9 +45,9 @@ async fn get_agent() -> BskyAgent {
     if let Err(err) = agent
         .to_config()
         .await
-        .save(&FileStore::new("config.json"))
+        .save(&FileStore::new("login.json"))
         .await {
-        panic!("Error while saving session to config.json: {}", err)
+        panic!("Error while saving session to login.json: {}", err)
     };
 
     agent
