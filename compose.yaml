@@ -1,6 +1,7 @@
 services:
   osaka-bot:
     image: r3tr0ananas/osaka-bot:latest
+    user: 1000:1000
     environment:
       - BSKY_EMAIL=example@example.com
       - BSKY_PASS=example

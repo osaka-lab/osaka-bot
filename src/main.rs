@@ -1,6 +1,6 @@
 use core::panic;
 use std::{env::var, path::Path};
-use bsky_sdk::{agent::config::{Config, FileStore}, api::{self, app::bsky::feed::post}, BskyAgent};
+use bsky_sdk::{agent::config::{Config, FileStore}, api::{self, app::bsky::feed::post}, rich_text::RichText, BskyAgent};
 
 use api::types::string::Datetime;
 use chrono_tz::Europe::Amsterdam;
@@ -84,17 +84,31 @@ async fn post(agent: BskyAgent, images: &mut Images) {
 
     let embed = image.make_into_embed(&agent).await;
 
+    let rt = match &image.credit {
+        Some(credit) => {
+            RichText::new_with_detect_facets(
+                format!("#azumanga #azumangadaioh\n\nCredit: {}", credit),
+            ).await
+        },
+        None => {
+            RichText::new_with_detect_facets(
+                "#azumanga #azumangadaioh"
+            ).await
+        }
+    }
+    .unwrap();
+
     let record = agent
         .create_record(post::RecordData {
             created_at: Datetime::now(),
             embed: embed,
             entities: None,
-            facets: None,
+            facets: rt.facets,
             labels: None,
             langs: None,
             reply: None,
             tags: None,
-            text: "".to_string()
+            text: rt.text
         })
         .await;
 

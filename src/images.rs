@@ -1,8 +1,9 @@
 use bsky_sdk::{api::{types::Union, app::bsky::embed::images, app::bsky::feed::post}, BskyAgent};
 use glob::glob;
-use std::{path::PathBuf, fs};
+use std::{fs, path::{Path, PathBuf}};
 use tokio::{fs::File, io::AsyncReadExt};
 use rand::{seq::SliceRandom, thread_rng};
+use serde::Deserialize;
 
 #[derive(Clone, Debug)]
 pub struct Images {
@@ -12,7 +13,13 @@ pub struct Images {
 
 #[derive(Clone, Debug)]
 pub struct Image {
-    path: PathBuf
+    path: PathBuf,
+    pub credit: Option<String>
+}
+
+#[derive(Deserialize)]
+struct CreditToml {
+    credit: String
 }
 
 impl Default for Images {
@@ -58,9 +65,27 @@ impl Images {
             return None
         }
 
+        let mut credit = None;
+        let path = path.unwrap();
+
+        let toml_path = format!("{}/{}.toml", self.path, path.file_stem().unwrap().to_string_lossy());
+
+        println!("{}", toml_path);
+
+        if Path::new(&toml_path).exists() {
+            let value = fs::read_to_string(&toml_path).unwrap(); // Shouldn't error because erm i check if it exists.
+            let parsed_credit = toml::from_str::<CreditToml>(&value);
+
+            credit = match parsed_credit {
+                Ok(credit_toml) => Some(credit_toml.credit.clone()),
+                Err(_) => None,
+            };
+        }
+
         Some(
             Image {
-                path: path.unwrap().clone()
+                path: path.clone(),
+                credit
             }
         )
     }
@@ -84,7 +109,7 @@ impl Image {
         
                 images.push(
                     images::ImageData {
-                        alt: "sata-andagi.moe".to_string(),
+                        alt: "".to_string(),
                         aspect_ratio: None,
                         image: output.data.blob,
                     }
