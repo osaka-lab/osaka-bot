@@ -60,7 +60,7 @@ async fn main() {
 
     let mut cron = AsyncCron::new(Amsterdam);
 
-    let _first_job_id = cron.add_fn("0 13 * * * *", move || {
+    let _first_job_id = cron.add_fn("0 13 * * *", move || {
         let agent = agent.clone();
         let mut images = images.clone();
 
