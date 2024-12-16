@@ -66,6 +66,7 @@ async fn main() {
 
         async move {
             post(agent, &mut images).await;
+            println!("Uploaded new picture");
         }
     }).await;
 
@@ -116,5 +117,5 @@ async fn post(agent: BskyAgent, images: &mut Images) {
         println!("Failed to post image: {}", record.unwrap_err())
     }
 
-    images.move_image(&image);
+    images.move_files(&image);
 }

@@ -13,7 +13,8 @@ pub struct Images {
 
 #[derive(Clone, Debug)]
 pub struct Image {
-    path: PathBuf,
+    pub path: PathBuf,
+    pub toml_path: Option<PathBuf>,
     pub credit: Option<String>
 }
 
@@ -36,14 +37,14 @@ impl Default for Images {
         }
 
         Self {
-            path: "./images".to_string(),
-            uploaded_path: "./uploaded".to_string(),
+            path,
+            uploaded_path
         }
     }
 }
 
 impl Images {
-    pub fn move_image(&self, image: &Image) {
+    pub fn move_files(&self, image: &Image) {
         let path = &image.path;
         let file_name = path.file_name().unwrap();
 
@@ -51,12 +52,29 @@ impl Images {
         if let Err(e) = std::fs::rename(&path, &dist) {
             eprintln!("Failed to move file '{:?}' to '{:?}': '{}'", path, dist, e);
         }
+
+        let toml_path = &image.toml_path;
+
+        if toml_path.is_some() {
+            let path = toml_path.as_ref().unwrap();
+            let file_name = path.file_name().unwrap();
+    
+            let dist = format!("{}/{}", self.uploaded_path, file_name.to_string_lossy());
+            if let Err(e) = std::fs::rename(&path, &dist) {
+                eprintln!("Failed to move file '{:?}' to '{:?}': '{}'", path, dist, e);
+            }
+        }
+
     }
 
     pub fn get_random_image(&mut self) -> Option<Image> {
-        let glob_path = format!("{}/*", self.path);
-        let images: Vec<_> = glob(&glob_path)
-            .expect(format!("Failed to glob file path '{}'", &glob_path).as_str())
+        let png = &format!("{}/*.png", self.path);
+        let jpg = &format!("{}/*.jpg", self.path);
+        let jpeg = &format!("{}/*.jpeg", self.path);
+
+        let images: Vec<_> = glob(png).unwrap()
+            .chain(glob(jpg).unwrap())
+            .chain(glob(jpeg).unwrap())
             .into_iter().flatten().collect();
         
         let path = images.choose(&mut thread_rng());
@@ -66,25 +84,26 @@ impl Images {
         }
 
         let mut credit = None;
+        let mut toml_path = None;
         let path = path.unwrap();
 
-        let toml_path = format!("{}/{}.toml", self.path, path.file_stem().unwrap().to_string_lossy());
+        let toml_str = format!("{}/{}.toml", self.path, path.file_stem().unwrap().to_string_lossy());
+        let toml_buf = PathBuf::from(&toml_str);
 
-        println!("{}", toml_path);
-
-        if PathBuf::from(&toml_path).exists() {
-            let value = fs::read_to_string(&toml_path).unwrap(); // Shouldn't error because erm i check if it exists.
+        if toml_buf.exists() {
+            toml_path = Some(toml_buf.clone());
+            let value = fs::read_to_string(&toml_buf).unwrap(); // Shouldn't error because erm i check if it exists.
             let parsed_credit = toml::from_str::<CreditToml>(&value);
 
-            credit = match parsed_credit {
-                Ok(credit_toml) => Some(credit_toml.credit.clone()),
-                Err(_) => None,
-            };
+            if parsed_credit.is_ok() {
+                credit = Some(parsed_credit.unwrap().credit);
+            }
         }
 
         Some(
             Image {
                 path: path.clone(),
+                toml_path,
                 credit
             }
         )
