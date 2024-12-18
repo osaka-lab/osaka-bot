@@ -4,7 +4,7 @@ use bsky_sdk::{agent::config::{Config, FileStore}, api::{self, app::bsky::feed::
 
 use api::types::string::Datetime;
 use chrono_tz::Europe::Amsterdam;
-use cron_tab::AsyncCron;
+use tokio_schedule::{every, Job};
 use crate::images::Images;
 
 mod images;
@@ -58,20 +58,16 @@ async fn main() {
     let agent = get_agent().await;
     let images = Images::default();
 
-    let mut cron = AsyncCron::new(Amsterdam);
+    let daily_post = every(1).day().at(13, 00, 00)
+        .in_timezone(&Amsterdam)
+        .perform(|| async {
+            let agent = agent.clone();
+            let mut images = images.clone();
 
-    let _first_job_id = cron.add_fn("0 13 * * *", move || {
-        let agent = agent.clone();
-        let mut images = images.clone();
-
-        async move {
             post(agent, &mut images).await;
-            println!("Uploaded new picture");
-        }
-    }).await;
-
-    cron.start().await;
-    tokio::signal::ctrl_c().await.expect("Failed to listen for Ctrl+C");
+        });
+    
+    daily_post.await;
 }
 
 async fn post(agent: BskyAgent, images: &mut Images) {

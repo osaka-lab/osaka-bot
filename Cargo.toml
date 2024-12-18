@@ -7,8 +7,8 @@ edition = "2021"
 bsky-sdk = "0.1.14"
 glob = "0.3.1"
 rand = "0.8.5"
-tokio = {version = "1.42.0", features = ["rt", "macros", "fs", "signal"]}
-cron_tab = {version = "0.2.7", features = ["async"]}
+tokio = {version = "1.42.0", features = ["rt", "macros", "fs", "rt-multi-thread"]}
+tokio_schedule = "0.3.2"
 chrono-tz = "0.10.0"
 toml = "0.8.19"
 serde = "1.0.216"
