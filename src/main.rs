@@ -84,12 +84,12 @@ async fn post(agent: BskyAgent, images: &mut Images) {
     let rt = match &image.credit {
         Some(credit) => {
             RichText::new_with_detect_facets(
-                format!("#azumanga #azumangadaioh\n\nCredit: {}", credit),
+                format!("#azumanga #azumangadaioh #azumangamemes\n\nCredit: {}", credit),
             ).await
         },
         None => {
             RichText::new_with_detect_facets(
-                "#azumanga #azumangadaioh"
+                "#azumanga #azumangadaioh #azumangamemes"
             ).await
         }
     }
@@ -114,4 +114,12 @@ async fn post(agent: BskyAgent, images: &mut Images) {
     }
 
     images.move_files(&image);
+}
+
+#[tokio::test]
+async fn test_image() {
+    let mut images = Images::default();
+    let image = images.get_random_image();
+
+    images.move_files(&image.unwrap());
 }

@@ -49,8 +49,12 @@ impl Images {
         let file_name = path.file_name().unwrap();
 
         let dist = format!("{}/{}", self.uploaded_path, file_name.to_string_lossy());
-        if let Err(e) = std::fs::rename(&path, &dist) {
-            eprintln!("Failed to move file '{:?}' to '{:?}': '{}'", path, dist, e);
+        if let Err(e) = std::fs::copy(&path, &dist) {
+            eprintln!("Failed to copy file '{:?}' to '{:?}': '{}'", path, dist, e);
+        }
+
+        if let Err(e) = std::fs::remove_file(&path) {
+            eprintln!("Failed to delete file '{:?}': '{}'", path, e);
         }
 
         let toml_path = &image.toml_path;
@@ -60,8 +64,13 @@ impl Images {
             let file_name = path.file_name().unwrap();
     
             let dist = format!("{}/{}", self.uploaded_path, file_name.to_string_lossy());
-            if let Err(e) = std::fs::rename(&path, &dist) {
-                eprintln!("Failed to move file '{:?}' to '{:?}': '{}'", path, dist, e);
+
+            if let Err(e) = std::fs::copy(&path, &dist) {
+                eprintln!("Failed to copy file '{:?}' to '{:?}': '{}'", path, dist, e);
+            }
+    
+            if let Err(e) = std::fs::remove_file(&path) {
+                eprintln!("Failed to delete file '{:?}': '{}'", path, e);
             }
         }
 
